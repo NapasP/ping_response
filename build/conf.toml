@@ -9,9 +9,16 @@ downCar = 5
 #После N раз появиться сообщение что машина ожила, это когда TimeOut
 aliveCar = 8
 
-#Включить увидомление в telegramBot
+#Включить увидомление в telegram
 switchTelegram = false
 #Ключ телеграм бота
 telegramBotKey = ""
 #ID чата где находиться бот
 chatID = ""
+
+#Включить увидомление в Discord
+SwitchDiscord = false
+#Ключ Discord бота
+DiscordBotKey = ""
+#ID чата где находиться бот
+ChatIDDiscord = ""

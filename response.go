@@ -5,19 +5,25 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/bwmarrin/discordgo"
 	"github.com/sparrc/go-ping"
 	"github.com/valyala/fasthttp"
 )
 
 type config struct {
-	IpPing         string
-	MaxPing        int64
-	WarningPing    int
-	DownCar        int
-	AliveCar       int
+	IpPing      string
+	MaxPing     int64
+	WarningPing int
+	DownCar     int
+	AliveCar    int
+
 	SwitchTelegram bool
 	TelegramBotKey string
 	ChatID         string
+
+	SwitchDiscord bool
+	DiscordBotKey string
+	ChatIDDiscord string
 }
 
 func main() {
@@ -26,6 +32,18 @@ func main() {
 	if _, err := toml.DecodeFile("conf.toml", &conf); err != nil {
 		fmt.Println(err)
 		return
+	}
+
+	discord, err := discordgo.New("Bot " + conf.DiscordBotKey)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if conf.SwitchTelegram {
+		err = discord.Open()
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	pinger, err := ping.NewPinger(conf.IpPing)
@@ -51,12 +69,20 @@ func main() {
 			if stats.MaxRtt.Milliseconds() == int64(0) {
 				countTimeOut++
 				if countTimeOut > conf.DownCar {
-					if !conf.SwitchTelegram {
+					if conf.SwitchTelegram {
 						_, _, err := client.Get(body, "https://api.telegram.org/bot"+conf.TelegramBotKey+"/sendMessage?chat_id="+conf.ChatID+"&text="+fmt.Sprintf("Ваша тачка упала, GG."))
 						if err != nil {
 							fmt.Println(err)
 						}
 					}
+
+					if conf.SwitchDiscord {
+						_, err = discord.ChannelMessageSend(conf.ChatIDDiscord, fmt.Sprintf("Ваша тачка упала, GG."))
+						if err != nil {
+							fmt.Println(err)
+						}
+					}
+
 					countTimeOut = 0
 					timeOut = true
 				}
@@ -65,12 +91,20 @@ func main() {
 			if stats.MaxRtt.Milliseconds() > conf.MaxPing {
 				count++
 				if count > conf.WarningPing {
-					if !conf.SwitchTelegram {
+					if conf.SwitchTelegram {
 						_, _, err := client.Get(body, "https://api.telegram.org/bot"+conf.TelegramBotKey+"/sendMessage?chat_id="+conf.ChatID+"&text="+fmt.Sprintf("Пинг выше нормы: %d ms.", stats.MaxRtt.Milliseconds()))
 						if err != nil {
 							fmt.Println(err)
 						}
 					}
+
+					if conf.SwitchDiscord {
+						_, err = discord.ChannelMessageSend(conf.ChatIDDiscord, fmt.Sprintf("Пинг выше нормы: %d ms.", stats.MaxRtt.Milliseconds()))
+						if err != nil {
+							fmt.Println(err)
+						}
+					}
+
 					count = 0
 				}
 			}
@@ -78,12 +112,20 @@ func main() {
 			if stats.MaxRtt.Milliseconds() > int64(0) {
 				countAlive++
 				if count > conf.AliveCar {
-					if !conf.SwitchTelegram {
+					if conf.SwitchTelegram {
 						_, _, err := client.Get(body, "https://api.telegram.org/bot"+conf.TelegramBotKey+"/sendMessage?chat_id="+conf.ChatID+"&text="+fmt.Sprintf("Ваша тачка ожила."))
 						if err != nil {
 							fmt.Println(err)
 						}
 					}
+
+					if conf.SwitchDiscord {
+						_, err = discord.ChannelMessageSend(conf.ChatIDDiscord, fmt.Sprintf("Ваша тачка ожила."))
+						if err != nil {
+							fmt.Println(err)
+						}
+					}
+
 					timeOut = false
 					countAlive = 0
 				}
