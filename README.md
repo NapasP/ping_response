@@ -15,7 +15,7 @@ $ ./respone
 ```
 
 ### Create bot telegram
-1. Ddd to contact botfather in telegram;
+1. Add to contact botfather in telegram;
 2. Press start;
 3. We write /newbot;
 4. Set name;
