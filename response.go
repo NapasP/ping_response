@@ -1,11 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"github.com/bwmarrin/discordgo"
 	"github.com/sparrc/go-ping"
 	"github.com/valyala/fasthttp"
 )
@@ -21,30 +21,26 @@ type config struct {
 	TelegramBotKey string
 	ChatID         string
 
-	SwitchDiscord bool
-	DiscordBotKey string
-	ChatIDDiscord string
+	SwitchDiscord  bool
+	DiscordWebHook string
+}
+
+type discordMessage struct {
+	AvatarURL string `json:"avatar_url"`
+	Content   string `json:"content"`
 }
 
 func main() {
 	var conf config
+	var discordMessages discordMessage
+	var creatorJSON []byte
 
 	if _, err := toml.DecodeFile("conf.toml", &conf); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	discord, err := discordgo.New("Bot " + conf.DiscordBotKey)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	if conf.SwitchTelegram {
-		err = discord.Open()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
+	discordMessages.AvatarURL = "https://media.discordapp.net/attachments/442265055220858880/693198503794442300/unknown.png"
 
 	pinger, err := ping.NewPinger(conf.IpPing)
 	if err != nil {
@@ -77,10 +73,22 @@ func main() {
 					}
 
 					if conf.SwitchDiscord {
-						_, err = discord.ChannelMessageSend(conf.ChatIDDiscord, fmt.Sprintf("Ваша тачка упала, GG."))
-						if err != nil {
-							fmt.Println(err)
+						discordMessages.Content = "Ваша тачка упала, GG."
+
+						creatorJSON, _ = json.Marshal(discordMessages)
+
+						req := fasthttp.AcquireRequest()
+						req.Header.SetContentType("application/json")
+						req.SetBody(creatorJSON)
+						req.Header.SetMethodBytes([]byte("POST"))
+						req.SetRequestURIBytes([]byte(conf.DiscordWebHook))
+						res := fasthttp.AcquireResponse()
+						if err := fasthttp.Do(req, res); err != nil {
+							panic("handle error")
 						}
+
+						fasthttp.ReleaseRequest(req)
+						fasthttp.ReleaseResponse(res)
 					}
 
 					countTimeOut = 0
@@ -99,10 +107,22 @@ func main() {
 					}
 
 					if conf.SwitchDiscord {
-						_, err = discord.ChannelMessageSend(conf.ChatIDDiscord, fmt.Sprintf("Пинг выше нормы: %d ms.", stats.MaxRtt.Milliseconds()))
-						if err != nil {
-							fmt.Println(err)
+						discordMessages.Content = fmt.Sprintf("Пинг выше нормы: %d ms.", stats.MaxRtt.Milliseconds())
+
+						creatorJSON, _ = json.Marshal(discordMessages)
+
+						req := fasthttp.AcquireRequest()
+						req.Header.SetContentType("application/json")
+						req.SetBody(creatorJSON)
+						req.Header.SetMethodBytes([]byte("POST"))
+						req.SetRequestURIBytes([]byte(conf.DiscordWebHook))
+						res := fasthttp.AcquireResponse()
+						if err := fasthttp.Do(req, res); err != nil {
+							panic("handle error")
 						}
+
+						fasthttp.ReleaseRequest(req)
+						fasthttp.ReleaseResponse(res)
 					}
 
 					count = 0
@@ -120,10 +140,23 @@ func main() {
 					}
 
 					if conf.SwitchDiscord {
-						_, err = discord.ChannelMessageSend(conf.ChatIDDiscord, fmt.Sprintf("Ваша тачка ожила."))
-						if err != nil {
-							fmt.Println(err)
+						discordMessages.Content = "Ваша тачка ожила."
+
+						creatorJSON, _ = json.Marshal(discordMessages)
+
+						req := fasthttp.AcquireRequest()
+						req.Header.SetContentType("application/json")
+						req.SetBody(creatorJSON)
+						req.Header.SetMethodBytes([]byte("POST"))
+						req.SetRequestURIBytes([]byte(conf.DiscordWebHook))
+						res := fasthttp.AcquireResponse()
+						if err := fasthttp.Do(req, res); err != nil {
+							panic("handle error")
 						}
+
+						fasthttp.ReleaseRequest(req)
+						fasthttp.ReleaseResponse(res)
+
 					}
 
 					timeOut = false

@@ -18,7 +18,5 @@ chatID = ""
 
 #Включить увидомление в Discord
 SwitchDiscord = false
-#Ключ Discord бота
-DiscordBotKey = ""
-#ID чата где находиться бот
-ChatIDDiscord = ""
+#WebHook Url
+DiscordWebHook = ""
