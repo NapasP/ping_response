@@ -12,6 +12,7 @@ $ git clone https://github.com/NapasP/ping_response.git
 $ cd build
 $ chmod 775 respone
 $ ./respone
+```
 
 ### Create bot telegram
 1. Ddd to contact botfather in telegram;
