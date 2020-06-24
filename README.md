@@ -21,7 +21,7 @@ $ ./respone
 4. Set name;
 5. Copy token key and insert to config.
 
-#### How to find chat id:
+#### How to find chat id telegram
 1. Add bot to new chat;
 2. Write any message in chat;
 3. Go to the URL https://api.telegram.org/bot**TOKEN_BOT**/getUpdates;
