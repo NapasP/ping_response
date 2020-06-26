@@ -11,7 +11,7 @@ Install in your server and start file build/respone.exe.
 $ git clone https://github.com/NapasP/ping_response.git
 $ cd build
 $ chmod 775 respone
-$ sudo ./respone
+$ screen -d -m ./respone
 ```
 
 ### Create bot telegram

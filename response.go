@@ -31,6 +31,7 @@ type discordMessage struct {
 }
 
 func main() {
+	fmt.Println("Скрипт запустился.")
 	var conf config
 	var discordMessages discordMessage
 	var creatorJSON []byte
@@ -60,97 +61,96 @@ func main() {
 
 	client := &fasthttp.Client{MaxConnDuration: time.Second * 5}
 
-	go func() {
-		pinger.OnFinish = func(stats *ping.Statistics) {
-			if !timeOut {
-				if stats.MaxRtt.Milliseconds() == int64(0) {
-					countTimeOut++
-					if countTimeOut > conf.DownCar {
-						if conf.SwitchTelegram {
-							_, _, err := client.Get(body, "https://api.telegram.org/bot"+conf.TelegramBotKey+"/sendMessage?chat_id="+conf.ChatID+"&text="+fmt.Sprintf("Ваш сервер упал:\nIP - %s.", conf.IpPing))
-							if err != nil {
-								fmt.Println(err)
-							}
+	pinger.OnFinish = func(stats *ping.Statistics) {
+		if !timeOut {
+			if stats.MaxRtt.Milliseconds() == int64(0) {
+				countTimeOut++
+				if countTimeOut > conf.DownCar {
+					if conf.SwitchTelegram {
+						_, _, err := client.Get(body, "https://api.telegram.org/bot"+conf.TelegramBotKey+"/sendMessage?chat_id="+conf.ChatID+"&text="+fmt.Sprintf("Ваш сервер упал:\nIP - %s.", conf.IpPing))
+						if err != nil {
+							fmt.Println(err)
 						}
-						if conf.SwitchDiscord {
-							discordMessages.Content = fmt.Sprintf("Ваш сервер упал:\nIP - %s.", conf.IpPing)
-							creatorJSON, _ = json.Marshal(discordMessages)
-							req := fasthttp.AcquireRequest()
-							req.Header.SetContentType("application/json")
-							req.SetBody(creatorJSON)
-							req.Header.SetMethodBytes([]byte("POST"))
-							req.SetRequestURIBytes([]byte(conf.DiscordWebHook))
-							res := fasthttp.AcquireResponse()
-							if err := fasthttp.Do(req, res); err != nil {
-								panic("handle error")
-							}
-							fasthttp.ReleaseRequest(req)
-							fasthttp.ReleaseResponse(res)
-						}
-						countTimeOut = 0
-						timeOut = true
 					}
+					if conf.SwitchDiscord {
+						discordMessages.Content = fmt.Sprintf("Ваш сервер упал:\nIP - %s.", conf.IpPing)
+						creatorJSON, _ = json.Marshal(discordMessages)
+						req := fasthttp.AcquireRequest()
+						req.Header.SetContentType("application/json")
+						req.SetBody(creatorJSON)
+						req.Header.SetMethodBytes([]byte("POST"))
+						req.SetRequestURIBytes([]byte(conf.DiscordWebHook))
+						res := fasthttp.AcquireResponse()
+						if err := fasthttp.Do(req, res); err != nil {
+							panic("handle error")
+						}
+						fasthttp.ReleaseRequest(req)
+						fasthttp.ReleaseResponse(res)
+					}
+					countTimeOut = 0
+					timeOut = true
 				}
+			}
 
-				if stats.MaxRtt.Milliseconds() > conf.MaxPing {
-					count++
-					if count > conf.WarningPing {
-						if conf.SwitchTelegram {
-							_, _, err := client.Get(body, "https://api.telegram.org/bot"+conf.TelegramBotKey+"/sendMessage?chat_id="+conf.ChatID+"&text="+fmt.Sprintf("Пинг выше нормы:\n%d ms\nIP - %s.", stats.MaxRtt.Milliseconds(), conf.IpPing))
-							if err != nil {
-								fmt.Println(err)
-							}
+			if stats.MaxRtt.Milliseconds() > conf.MaxPing {
+				count++
+				if count > conf.WarningPing {
+					if conf.SwitchTelegram {
+						_, _, err := client.Get(body, "https://api.telegram.org/bot"+conf.TelegramBotKey+"/sendMessage?chat_id="+conf.ChatID+"&text="+fmt.Sprintf("Пинг выше нормы:\n%d ms\nIP - %s.", stats.MaxRtt.Milliseconds(), conf.IpPing))
+						if err != nil {
+							fmt.Println(err)
 						}
-						if conf.SwitchDiscord {
-							discordMessages.Content = fmt.Sprintf("Пинг выше нормы:\n%d ms\nIP - %s.", stats.MaxRtt.Milliseconds(), conf.IpPing)
-							creatorJSON, _ = json.Marshal(discordMessages)
-							req := fasthttp.AcquireRequest()
-							req.Header.SetContentType("application/json")
-							req.SetBody(creatorJSON)
-							req.Header.SetMethodBytes([]byte("POST"))
-							req.SetRequestURIBytes([]byte(conf.DiscordWebHook))
-							res := fasthttp.AcquireResponse()
-							if err := fasthttp.Do(req, res); err != nil {
-								panic("handle error")
-							}
-							fasthttp.ReleaseRequest(req)
-							fasthttp.ReleaseResponse(res)
-						}
-						count = 0
 					}
+					if conf.SwitchDiscord {
+						discordMessages.Content = fmt.Sprintf("Пинг выше нормы:\n%d ms\nIP - %s.", stats.MaxRtt.Milliseconds(), conf.IpPing)
+						creatorJSON, _ = json.Marshal(discordMessages)
+						req := fasthttp.AcquireRequest()
+						req.Header.SetContentType("application/json")
+						req.SetBody(creatorJSON)
+						req.Header.SetMethodBytes([]byte("POST"))
+						req.SetRequestURIBytes([]byte(conf.DiscordWebHook))
+						res := fasthttp.AcquireResponse()
+						if err := fasthttp.Do(req, res); err != nil {
+							panic("handle error")
+						}
+						fasthttp.ReleaseRequest(req)
+						fasthttp.ReleaseResponse(res)
+					}
+					count = 0
 				}
-			} else {
-				if stats.MaxRtt.Milliseconds() > int64(0) {
-					countAlive++
-					if count > conf.AliveCar {
-						if conf.SwitchTelegram {
-							_, _, err := client.Get(body, "https://api.telegram.org/bot"+conf.TelegramBotKey+"/sendMessage?chat_id="+conf.ChatID+"&text="+fmt.Sprintf("Ваш сервер проснулся:\nIP - %s.", conf.IpPing))
-							if err != nil {
-								fmt.Println(err)
-							}
+			}
+		} else {
+			if stats.MaxRtt.Milliseconds() > int64(0) {
+				countAlive++
+				if count > conf.AliveCar {
+					if conf.SwitchTelegram {
+						_, _, err := client.Get(body, "https://api.telegram.org/bot"+conf.TelegramBotKey+"/sendMessage?chat_id="+conf.ChatID+"&text="+fmt.Sprintf("Ваш сервер проснулся:\nIP - %s.", conf.IpPing))
+						if err != nil {
+							fmt.Println(err)
 						}
-						if conf.SwitchDiscord {
-							discordMessages.Content = fmt.Sprintf("Ваш сервер проснулся:\nIP - %s.", conf.IpPing)
-							creatorJSON, _ = json.Marshal(discordMessages)
-							req := fasthttp.AcquireRequest()
-							req.Header.SetContentType("application/json")
-							req.SetBody(creatorJSON)
-							req.Header.SetMethodBytes([]byte("POST"))
-							req.SetRequestURIBytes([]byte(conf.DiscordWebHook))
-							res := fasthttp.AcquireResponse()
-							if err := fasthttp.Do(req, res); err != nil {
-								panic("handle error")
-							}
-							fasthttp.ReleaseRequest(req)
-							fasthttp.ReleaseResponse(res)
-						}
-						timeOut = false
-						countAlive = 0
 					}
+					if conf.SwitchDiscord {
+						discordMessages.Content = fmt.Sprintf("Ваш сервер проснулся:\nIP - %s.", conf.IpPing)
+						creatorJSON, _ = json.Marshal(discordMessages)
+						req := fasthttp.AcquireRequest()
+						req.Header.SetContentType("application/json")
+						req.SetBody(creatorJSON)
+						req.Header.SetMethodBytes([]byte("POST"))
+						req.SetRequestURIBytes([]byte(conf.DiscordWebHook))
+						res := fasthttp.AcquireResponse()
+						if err := fasthttp.Do(req, res); err != nil {
+							panic("handle error")
+						}
+						fasthttp.ReleaseRequest(req)
+						fasthttp.ReleaseResponse(res)
+					}
+					timeOut = false
+					countAlive = 0
 				}
 			}
 		}
-	}()
+	}
+
 	for {
 		pinger.Run()
 		timer1 := time.NewTimer(1 * time.Second)
