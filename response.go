@@ -150,10 +150,10 @@ func main() {
 				}
 			}
 		}
-		for {
-			pinger.Run()
-			timer1 := time.NewTimer(1 * time.Second)
-			<-timer1.C
-		}
 	}()
+	for {
+		pinger.Run()
+		timer1 := time.NewTimer(1 * time.Second)
+		<-timer1.C
+	}
 }
