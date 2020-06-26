@@ -62,6 +62,7 @@ func main() {
 	client := &fasthttp.Client{MaxConnDuration: time.Second * 5}
 
 	pinger.OnFinish = func(stats *ping.Statistics) {
+		fmt.Println(stats.MaxRtt.Milliseconds(), "ms.")
 		if !timeOut {
 			if stats.MaxRtt.Milliseconds() == int64(0) {
 				countTimeOut++
