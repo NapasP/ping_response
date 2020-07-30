@@ -128,20 +128,21 @@ func main() {
 	client := &fasthttp.Client{MaxConnDuration: time.Second * 5}
 
 	p := func(addr string) {
+		_, dur, err := Ping(addr)
 
-		dst, dur, err := Ping(addr)
 		if err != nil {
 			if !ipTemp[addr].TimeOut {
 				ipTemp[addr].CountTimeOut++
 				if ipTemp[addr].CountTimeOut > conf.DownCar {
 					if conf.SwitchTelegram {
-						_, _, err := client.Get(body, fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=Ваш сервер упал:%%0d%%0aIP - %s.", conf.TelegramBotKey, conf.ChatID, dst.String()))
+						_, _, err := client.Get(body, fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=Ваш сервер упал:%%0d%%0aIP - %s.", conf.TelegramBotKey, conf.ChatID, addr))
+
 						if err != nil {
 							fmt.Println(err)
 						}
 					}
 					if conf.SwitchDiscord {
-						discordMessages.Content = fmt.Sprintf("Ваш сервер упал:%%0d%%0aIP - %s.", dst)
+						discordMessages.Content = fmt.Sprintf("Ваш сервер упал:%%0d%%0aIP - %s.", addr)
 						creatorJSON, _ = json.Marshal(discordMessages)
 						req := fasthttp.AcquireRequest()
 						req.Header.SetContentType("application/json")
@@ -167,13 +168,13 @@ func main() {
 				ipTemp[addr].Count++
 				if ipTemp[addr].Count > conf.WarningPing {
 					if conf.SwitchTelegram {
-						_, _, err := client.Get(body, fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=Пинг выше нормы:%%0d%%0a%d ms.%%0d%%0aIP - %s.", conf.TelegramBotKey, conf.ChatID, dur.Milliseconds(), dst))
+						_, _, err := client.Get(body, fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=Пинг выше нормы:%%0d%%0a%d ms.%%0d%%0aIP - %s.", conf.TelegramBotKey, conf.ChatID, dur.Milliseconds(), addr))
 						if err != nil {
 							fmt.Println(err)
 						}
 					}
 					if conf.SwitchDiscord {
-						discordMessages.Content = fmt.Sprintf("Пинг выше нормы:%%0d%%0a%d ms.%%0d%%0aIP - %s.", dur.Milliseconds(), dst)
+						discordMessages.Content = fmt.Sprintf("Пинг выше нормы:%%0d%%0a%d ms.%%0d%%0aIP - %s.", dur.Milliseconds(), addr)
 						creatorJSON, _ = json.Marshal(discordMessages)
 						req := fasthttp.AcquireRequest()
 						req.Header.SetContentType("application/json")
@@ -196,13 +197,13 @@ func main() {
 
 				if ipTemp[addr].CountAlive > conf.AliveCar {
 					if conf.SwitchTelegram {
-						_, _, err := client.Get(body, fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=Ваш сервер проснулся:%%0d%%0aIP - %s.", conf.TelegramBotKey, conf.ChatID, dst))
+						_, _, err := client.Get(body, fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=Ваш сервер проснулся:%%0d%%0aIP - %s.", conf.TelegramBotKey, conf.ChatID, addr))
 						if err != nil {
 							fmt.Println(err)
 						}
 					}
 					if conf.SwitchDiscord {
-						discordMessages.Content = fmt.Sprintf("Ваш сервер проснулся:%%0d%%0aIP - %s.", dst)
+						discordMessages.Content = fmt.Sprintf("Ваш сервер проснулся:%%0d%%0aIP - %s.", addr)
 						creatorJSON, _ = json.Marshal(discordMessages)
 						req := fasthttp.AcquireRequest()
 						req.Header.SetContentType("application/json")
@@ -228,10 +229,10 @@ func main() {
 			ipTemp[addrres] = &Counter{0, 0, 0, false}
 
 			for {
-				fmt.Println(addrres)
-				fmt.Println(ipTemp[addrres].CountAlive)
-				fmt.Println(ipTemp[addrres].Count)
-				fmt.Println(ipTemp[addrres].CountTimeOut)
+				// fmt.Println(addrres)
+				// fmt.Println(ipTemp[addrres].CountAlive)
+				// fmt.Println(ipTemp[addrres].Count)
+				// fmt.Println(ipTemp[addrres].CountTimeOut)
 
 				p(addrres)
 				time.Sleep(1 * time.Second)
