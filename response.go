@@ -86,7 +86,7 @@ func Ping(addr string) (*net.IPAddr, time.Duration, error) {
 	}
 
 	// Wait for a reply
-	reply := make([]byte, 1500)
+	reply := make([]byte, 256)
 	err = c.SetReadDeadline(time.Now().Add(1 * time.Second))
 	if err != nil {
 		return dst, 0, err
@@ -129,7 +129,6 @@ func main() {
 
 	p := func(addr string) {
 		_, dur, err := Ping(addr)
-
 		if err != nil {
 			if !ipTemp[addr].TimeOut {
 				ipTemp[addr].CountTimeOut++
@@ -229,10 +228,9 @@ func main() {
 			ipTemp[addrres] = &Counter{0, 0, 0, false}
 
 			for {
-				// fmt.Println(addrres)
-				// fmt.Println(ipTemp[addrres].CountAlive)
-				// fmt.Println(ipTemp[addrres].Count)
-				// fmt.Println(ipTemp[addrres].CountTimeOut)
+				fmt.Println(ipTemp[addrres].CountAlive, "Жив")
+				fmt.Println(ipTemp[addrres].Count, "Опасный пинг")
+				fmt.Println(ipTemp[addrres].CountTimeOut, "Упал")
 
 				p(addrres)
 				time.Sleep(1 * time.Second)
