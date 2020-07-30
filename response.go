@@ -228,9 +228,10 @@ func main() {
 			ipTemp[addrres] = &Counter{0, 0, 0, false}
 
 			for {
-				fmt.Println(ipTemp[addrres].CountAlive, "Жив")
-				fmt.Println(ipTemp[addrres].Count, "Опасный пинг")
-				fmt.Println(ipTemp[addrres].CountTimeOut, "Упал")
+				fmt.Println(addrres)
+				fmt.Println(ipTemp[addrres].CountAlive, "Alive count")
+				fmt.Println(ipTemp[addrres].Count, "Big ping")
+				fmt.Println(ipTemp[addrres].CountTimeOut, "Time out")
 
 				p(addrres)
 				time.Sleep(1 * time.Second)
