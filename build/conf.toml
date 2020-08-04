@@ -8,6 +8,8 @@ warningPing = 5
 downCar = 5
 #После N раз появиться сообщение что машина ожила, это когда TimeOut
 aliveCar = 8
+#Интервал отправки сообщения о максимальном пинге в секундах
+delayMessage = 10
 
 #Включить увидомление в telegram
 switchTelegram = false

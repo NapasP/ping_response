@@ -14,11 +14,12 @@ import (
 )
 
 type config struct {
-	IpPing      []string
-	MaxPing     int64
-	WarningPing int
-	DownCar     int
-	AliveCar    int
+	IpPing       []string
+	MaxPing      int64
+	WarningPing  int
+	DownCar      int
+	AliveCar     int
+	DelayMessage time.Duration
 
 	SwitchTelegram bool
 	TelegramBotKey string
@@ -33,6 +34,7 @@ type Counter struct {
 	CountAlive   int
 	CountTimeOut int
 	TimeOut      bool
+	Delay        *time.Timer
 }
 
 var ipTemp = map[string]*Counter{}
@@ -166,6 +168,7 @@ func main() {
 			if dur.Milliseconds() > conf.MaxPing {
 				ipTemp[addr].Count++
 				if ipTemp[addr].Count > conf.WarningPing {
+					ipTemp[addr].Delay = time.NewTimer(time.Second * conf.DelayMessage)
 					if conf.SwitchTelegram {
 						_, _, err := client.Get(body, fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=Пинг выше нормы:%%0d%%0a%d ms.%%0d%%0aIP - %s.", conf.TelegramBotKey, conf.ChatID, dur.Milliseconds(), addr))
 						if err != nil {
@@ -188,6 +191,7 @@ func main() {
 						fasthttp.ReleaseResponse(res)
 					}
 					ipTemp[addr].Count = 0
+					<-ipTemp[addr].Delay.C
 				}
 			}
 		} else {
@@ -225,7 +229,7 @@ func main() {
 
 	for _, s := range conf.IpPing {
 		go func(addrres string) {
-			ipTemp[addrres] = &Counter{0, 0, 0, false}
+			ipTemp[addrres] = &Counter{0, 0, 0, false, time.NewTimer(time.Second)}
 
 			for {
 				fmt.Println(addrres)
