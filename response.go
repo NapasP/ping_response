@@ -141,7 +141,7 @@ func main() {
 						}
 					}
 					if conf.SwitchDiscord {
-						discordMessages.Content = fmt.Sprintf("Ваш сервер упал:%%0d%%0aIP - %s.", addr)
+						discordMessages.Content = fmt.Sprintf("Ваш сервер упал:\nIP - %s.", addr)
 						creatorJSON, _ = json.Marshal(discordMessages)
 						req := fasthttp.AcquireRequest()
 						req.Header.SetContentType("application/json")
@@ -173,7 +173,7 @@ func main() {
 						}
 					}
 					if conf.SwitchDiscord {
-						discordMessages.Content = fmt.Sprintf("Пинг выше нормы:%%0d%%0a%d ms.%%0d%%0aIP - %s.", dur.Milliseconds(), addr)
+						discordMessages.Content = fmt.Sprintf("Пинг выше нормы: %d ms.\nIP - %s.", dur.Milliseconds(), addr)
 						creatorJSON, _ = json.Marshal(discordMessages)
 						req := fasthttp.AcquireRequest()
 						req.Header.SetContentType("application/json")
@@ -202,7 +202,7 @@ func main() {
 						}
 					}
 					if conf.SwitchDiscord {
-						discordMessages.Content = fmt.Sprintf("Ваш сервер проснулся:%%0d%%0aIP - %s.", addr)
+						discordMessages.Content = fmt.Sprintf("Ваш сервер проснулся:\nIP - %s.", addr)
 						creatorJSON, _ = json.Marshal(discordMessages)
 						req := fasthttp.AcquireRequest()
 						req.Header.SetContentType("application/json")
