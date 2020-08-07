@@ -193,6 +193,8 @@ func main() {
 					ipTemp[addr].Count = 0
 					<-ipTemp[addr].Delay.C
 				}
+			} else {
+				ipTemp[addr].Count = 0
 			}
 		} else {
 			if dur.Milliseconds() > int64(0) {
@@ -223,6 +225,9 @@ func main() {
 					ipTemp[addr].TimeOut = false
 					ipTemp[addr].CountAlive = 0
 				}
+			} else {
+				ipTemp[addr].TimeOut = false
+				ipTemp[addr].CountAlive = 0
 			}
 		}
 	}
